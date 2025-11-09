@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reportes y Estadísticas - Sistema de Reservas{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-graph-up"></i> Reportes y Estadísticas</h2>
+            <p class="text-muted">Panel de análisis y métricas del sistema</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'exportar_reporte_pdf' %}" class="btn btn-danger me-2" target="_blank">
+                <i class="bi bi-file-pdf"></i> Exportar PDF
+            </a>
+            <a href="{% url 'exportar_reporte_excel' %}" class="btn btn-success">
+                <i class="bi bi-file-excel"></i> Exportar Excel
+            </a>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card text-white bg-primary stat-card shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Total Espacios</h6>
+                            <h2 class="mt-2">{{ total_espacios }}</h2>
+                        </div>
+                        <i class="bi bi-building display-3 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card text-white bg-success stat-card shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Total Reservas</h6>
+                            <h2 class="mt-2">{{ total_reservas }}</h2>
+                        </div>
+                        <i class="bi bi-calendar-check display-3 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card text-white bg-info stat-card shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Total Usuarios</h6>
+                            <h2 class="mt-2">{{ total_usuarios }}</h2>
+                        </div>
+                        <i class="bi bi-people display-3 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row mb-4">
+        <!-- Gráfico de Reservas por Estado -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Reservas por Estado</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="reservasPorEstadoChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Ocupación Semanal -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Ocupación Semanal</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="ocupacionSemanalChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Top 5 Espacios Más Reservados -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="bi bi-trophy"></i> Espacios Más Reservados</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="espaciosPopularesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reservas por Tipo de Espacio -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-diagram-3"></i> Reservas por Tipo</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="reservasPorTipoChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla Resumen -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-table"></i> Resumen por Estado</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Estado</th>
+                                    <th>Cantidad</th>
+                                    <th>Porcentaje</th>
+                                    <th>Visualización</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in reservas_por_estado %}
+                                <tr>
+                                    <td>
+                                        {% if item.estado == 'CONFIRMADA' %}
+                                            <span class="badge bg-success">Confirmada</span>
+                                        {% elif item.estado == 'PENDIENTE' %}
+                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                        {% elif item.estado == 'CANCELADA' %}
+                                            <span class="badge bg-danger">Cancelada</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Completada</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><strong>{{ item.total }}</strong></td>
+                                    <td>
+                                        {% widthratio item.total total_reservas 100 %}%
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar 
+                                                {% if item.estado == 'CONFIRMADA' %}bg-success
+                                                {% elif item.estado == 'PENDIENTE' %}bg-warning
+                                                {% elif item.estado == 'CANCELADA' %}bg-danger
+                                                {% else %}bg-secondary{% endif %}"
+                                                role="progressbar"
+                                                style="width: {% widthratio item.total total_reservas 100 %}%">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+// Datos desde Django
+const reservasPorEstado = {{ reservas_por_estado|safe }};
+const ocupacionSemanal = {{ ocupacion_semanal|safe }};
+const espaciosPopulares = {{ espacios_populares|safe }};
+const reservasPorTipo = {{ reservas_por_tipo|safe }};
+
+// Gráfico de Reservas por Estado (Pie)
+const ctxEstado = document.getElementById('reservasPorEstadoChart').getContext('2d');
+new Chart(ctxEstado, {
+    type: 'doughnut',
+    data: {
+        labels: reservasPorEstado.map(item => {
+            const estados = {
+                'CONFIRMADA': 'Confirmadas',
+                'PENDIENTE': 'Pendientes',
+                'CANCELADA': 'Canceladas',
+                'COMPLETADA': 'Completadas'
+            };
+            return estados[item.estado] || item.estado;
+        }),
+        datasets: [{
+            data: reservasPorEstado.map(item => item.total),
+            backgroundColor: [
+                'rgba(40, 167, 69, 0.8)',
+                'rgba(255, 193, 7, 0.8)',
+                'rgba(220, 53, 69, 0.8)',
+                'rgba(108, 117, 125, 0.8)'
+            ],
+            borderColor: [
+                'rgba(40, 167, 69, 1)',
+                'rgba(255, 193, 7, 1)',
+                'rgba(220, 53, 69, 1)',
+                'rgba(108, 117, 125, 1)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Gráfico de Ocupación Semanal (Line)
+const ctxSemanal = document.getElementById('ocupacionSemanalChart').getContext('2d');
+new Chart(ctxSemanal, {
+    type: 'line',
+    data: {
+        labels: ocupacionSemanal.map(item => item.fecha),
+        datasets: [{
+            label: 'Reservas',
+            data: ocupacionSemanal.map(item => item.total),
+            backgroundColor: 'rgba(40, 167, 69, 0.2)',
+            borderColor: 'rgba(40, 167, 69, 1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Espacios Más Populares (Bar Horizontal)
+const ctxPopulares = document.getElementById('espaciosPopularesChart').getContext('2d');
+new Chart(ctxPopulares, {
+    type: 'bar',
+    data: {
+        labels: espaciosPopulares.map(item => item.espacio__nombre),
+        datasets: [{
+            label: 'Número de Reservas',
+            data: espaciosPopulares.map(item => item.total),
+            backgroundColor: 'rgba(255, 193, 7, 0.8)',
+            borderColor: 'rgba(255, 193, 7, 1)',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Reservas por Tipo (Bar)
+const ctxTipo = document.getElementById('reservasPorTipoChart').getContext('2d');
+new Chart(ctxTipo, {
+    type: 'bar',
+    data: {
+        labels: reservasPorTipo.map(item => item.espacio__tipo__nombre || 'Sin tipo'),
+        datasets: [{
+            label: 'Reservas',
+            data: reservasPorTipo.map(item => item.total),
+            backgroundColor: 'rgba(23, 162, 184, 0.8)',
+            borderColor: 'rgba(23, 162, 184, 1)',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

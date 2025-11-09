@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle de Reserva - Sistema de Reservas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{% url 'lista_reservas' %}" class="btn btn-secondary mb-3">
+                <i class="bi bi-arrow-left"></i> Volver a Reservas
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-calendar-check"></i> Detalle de Reserva #{{ reserva.id }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>Información del Espacio</h5>
+                            <p>
+                                <strong>Nombre:</strong> {{ reserva.espacio.nombre }}<br>
+                                <strong>Código:</strong> {{ reserva.espacio.codigo }}<br>
+                                <strong>Tipo:</strong> {{ reserva.espacio.tipo.nombre }}<br>
+                                <strong>Ubicación:</strong> {{ reserva.espacio.ubicacion }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Información de la Reserva</h5>
+                            <p>
+                                <strong>Fecha:</strong> {{ reserva.fecha_reserva|date:"l, d F Y" }}<br>
+                                <strong>Hora inicio:</strong> {{ reserva.hora_inicio }}<br>
+                                <strong>Hora fin:</strong> {{ reserva.hora_fin }}<br>
+                                <strong>Estado:</strong>
+                                {% if reserva.estado == 'CONFIRMADA' %}
+                                    <span class="badge bg-success">{{ reserva.get_estado_display }}</span>
+                                {% elif reserva.estado == 'PENDIENTE' %}
+                                    <span class="badge bg-warning text-dark">{{ reserva.get_estado_display }}</span>
+                                {% elif reserva.estado == 'CANCELADA' %}
+                                    <span class="badge bg-danger">{{ reserva.get_estado_display }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ reserva.get_estado_display }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <h5>Usuario</h5>
+                        <p>
+                            <i class="bi bi-person"></i> {{ reserva.usuario.get_full_name|default:reserva.usuario.username }}<br>
+                            <i class="bi bi-envelope"></i> {{ reserva.usuario.email }}
+                        </p>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <h5>Motivo de la Reserva</h5>
+                        <p>{{ reserva.motivo }}</p>
+                    </div>
+
+                    {% if reserva.descripcion %}
+                    <div class="mb-3">
+                        <h5>Descripción Adicional</h5>
+                        <p>{{ reserva.descripcion|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="text-muted">
+                                <small>
+                                    <i class="bi bi-calendar-plus"></i> Creada: {{ reserva.fecha_creacion|date:"d/m/Y H:i" }}
+                                </small>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted">
+                                <small>
+                                    <i class="bi bi-calendar-event"></i> Actualizada: {{ reserva.fecha_actualizacion|date:"d/m/Y H:i" }}
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if reserva.confirmada_por %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i> Confirmada por: {{ reserva.confirmada_por.get_full_name|default:reserva.confirmada_por.username }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Acciones -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-lightning"></i> Acciones</h5>
+                </div>
+                <div class="card-body">
+                    {% if reserva.estado != 'CANCELADA' and reserva.estado != 'COMPLETADA' %}
+                        {% if es_admin or reserva.usuario == user %}
+                        <a href="{% url 'editar_reserva' reserva.pk %}" class="btn btn-warning w-100 mb-2">
+                            <i class="bi bi-pencil"></i> Editar Reserva
+                        </a>
+                        <a href="{% url 'cancelar_reserva' reserva.pk %}" class="btn btn-danger w-100 mb-2">
+                            <i class="bi bi-x-circle"></i> Cancelar Reserva
+                        </a>
+                        {% endif %}
+                        
+                        {% if es_admin and reserva.estado == 'PENDIENTE' %}
+                        <a href="{% url 'confirmar_reserva' reserva.pk %}" class="btn btn-success w-100 mb-2">
+                            <i class="bi bi-check-circle"></i> Confirmar Reserva
+                        </a>
+                        {% endif %}
+                    {% endif %}
+
+                    <a href="{% url 'detalle_espacio' reserva.espacio.pk %}" class="btn btn-info w-100 mb-2">
+                        <i class="bi bi-building"></i> Ver Espacio
+                    </a>
+
+                    <a href="{% url 'lista_reservas' %}" class="btn btn-secondary w-100">
+                        <i class="bi bi-arrow-left"></i> Volver a Lista
+                    </a>
+                </div>
+            </div>
+
+            <!-- Información Adicional -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-info-circle"></i> Información</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <i class="bi bi-clock"></i> Duración: 
+                        {% widthratio reserva.hora_fin.hour 1 60 as fin_mins %}
+                        {% widthratio reserva.hora_inicio.hour 1 60 as inicio_mins %}
+                        {% widthratio reserva.hora_fin.minute 1 1 as fin_extra %}
+                        {% widthratio reserva.hora_inicio.minute 1 1 as inicio_extra %}
+                        {% with total_mins=fin_mins|add:fin_extra|add:inicio_mins|add:inicio_extra %}
+                        {% endwith %}
+                        <!-- Cálculo simplificado -->
+                        Consulta horarios
+                    </p>
+                    <p class="mb-0">
+                        <i class="bi bi-people"></i> Capacidad del espacio: {{ reserva.espacio.capacidad }} personas
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

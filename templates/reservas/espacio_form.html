@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ accion }} Espacio - Sistema de Reservas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-building"></i> {{ accion }} Espacio
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                    {{ form.nombre.label }} *
+                                </label>
+                                {{ form.nombre }}
+                                {% if form.nombre.errors %}
+                                    <div class="text-danger">{{ form.nombre.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.codigo.id_for_label }}" class="form-label">
+                                    {{ form.codigo.label }} *
+                                </label>
+                                {{ form.codigo }}
+                                {% if form.codigo.errors %}
+                                    <div class="text-danger">{{ form.codigo.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.tipo.id_for_label }}" class="form-label">
+                                    {{ form.tipo.label }} *
+                                </label>
+                                {{ form.tipo }}
+                                {% if form.tipo.errors %}
+                                    <div class="text-danger">{{ form.tipo.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.capacidad.id_for_label }}" class="form-label">
+                                    {{ form.capacidad.label }} *
+                                </label>
+                                {{ form.capacidad }}
+                                {% if form.capacidad.errors %}
+                                    <div class="text-danger">{{ form.capacidad.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.ubicacion.id_for_label }}" class="form-label">
+                                {{ form.ubicacion.label }} *
+                            </label>
+                            {{ form.ubicacion }}
+                            {% if form.ubicacion.errors %}
+                                <div class="text-danger">{{ form.ubicacion.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                                {{ form.descripcion.label }}
+                            </label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                                <div class="text-danger">{{ form.descripcion.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.equipamiento.id_for_label }}" class="form-label">
+                                {{ form.equipamiento.label }}
+                            </label>
+                            {{ form.equipamiento }}
+                            {% if form.equipamiento.errors %}
+                                <div class="text-danger">{{ form.equipamiento.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{{ form.equipamiento.help_text }}</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.imagen.id_for_label }}" class="form-label">
+                                {{ form.imagen.label }}
+                            </label>
+                            {{ form.imagen }}
+                            {% if form.imagen.errors %}
+                                <div class="text-danger">{{ form.imagen.errors }}</div>
+                            {% endif %}
+                            {% if espacio and espacio.imagen %}
+                                <div class="mt-2">
+                                    <img src="{{ espacio.imagen.url }}" alt="Imagen actual" class="img-thumbnail" style="max-height: 150px;">
+                                    <p class="text-muted mt-1"><small>Imagen actual</small></p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            {{ form.activo }}
+                            <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                                {{ form.activo.label }}
+                            </label>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% if espacio %}{% url 'detalle_espacio' espacio.pk %}{% else %}{% url 'lista_espacios' %}{% endif %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> {{ accion }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

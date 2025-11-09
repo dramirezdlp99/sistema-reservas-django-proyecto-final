@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inicio - Sistema de Reservas{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-primary text-white py-5">
+    <div class="container text-center">
+        <h1 class="display-4"><i class="bi bi-calendar-check"></i> Sistema de Reservas de Espacios</h1>
+        <p class="lead">Reserva aulas, laboratorios y salas de manera fácil y rápida</p>
+        {% if not user.is_authenticated %}
+        <div class="mt-4">
+            <a href="{% url 'registro' %}" class="btn btn-light btn-lg me-2">
+                <i class="bi bi-person-plus"></i> Registrarse
+            </a>
+            <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">
+                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+            </a>
+        </div>
+        {% else %}
+        <div class="mt-4">
+            <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg me-2">
+                <i class="bi bi-speedometer2"></i> Ir al Dashboard
+            </a>
+            <a href="{% url 'crear_reserva' %}" class="btn btn-outline-light btn-lg">
+                <i class="bi bi-plus-circle"></i> Nueva Reserva
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Tipos de Espacios -->
+<div class="container my-5">
+    <h2 class="text-center mb-4">Tipos de Espacios Disponibles</h2>
+    <div class="row">
+        {% for tipo in tipos_espacios %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-building display-3 text-primary"></i>
+                    <h5 class="card-title mt-3">{{ tipo.nombre }}</h5>
+                    <p class="card-text">{{ tipo.descripcion|truncatewords:15 }}</p>
+                    <p class="text-muted">
+                        <small>Capacidad: {{ tipo.capacidad_minima }} - {{ tipo.capacidad_maxima }} personas</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <p class="text-muted">No hay tipos de espacios disponibles.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Espacios Destacados -->
+<div class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Espacios Destacados</h2>
+        <div class="row">
+            {% for espacio in espacios_destacados %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    {% if espacio.imagen %}
+                    <img src="{{ espacio.imagen.url }}" class="card-img-top" alt="{{ espacio.nombre }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="bi bi-building display-1"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ espacio.nombre }}</h5>
+                        <p class="card-text">
+                            <i class="bi bi-geo-alt"></i> {{ espacio.ubicacion }}<br>
+                            <i class="bi bi-people"></i> Capacidad: {{ espacio.capacidad }} personas
+                        </p>
+                        <a href="{% url 'detalle_espacio' espacio.pk %}" class="btn btn-primary btn-sm">
+                            Ver Detalles <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No hay espacios disponibles en este momento.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'lista_espacios' %}" class="btn btn-primary">
+                Ver Todos los Espacios <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Características -->
+<div class="container my-5">
+    <h2 class="text-center mb-4">¿Por qué usar nuestro sistema?</h2>
+    <div class="row text-center">
+        <div class="col-md-3 mb-4">
+            <i class="bi bi-clock-history display-3 text-primary"></i>
+            <h5 class="mt-3">Disponibilidad 24/7</h5>
+            <p class="text-muted">Reserva en cualquier momento del día</p>
+        </div>
+        <div class="col-md-3 mb-4">
+            <i class="bi bi-shield-check display-3 text-success"></i>
+            <h5 class="mt-3">Confirmación Rápida</h5>
+            <p class="text-muted">Obtén confirmación inmediata de tu reserva</p>
+        </div>
+        <div class="col-md-3 mb-4">
+            <i class="bi bi-calendar3 display-3 text-warning"></i>
+            <h5 class="mt-3">Calendario Integrado</h5>
+            <p class="text-muted">Visualiza todas tus reservas en un solo lugar</p>
+        </div>
+        <div class="col-md-3 mb-4">
+            <i class="bi bi-bell display-3 text-info"></i>
+            <h5 class="mt-3">Recordatorios</h5>
+            <p class="text-muted">Recibe notificaciones de tus reservas</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Espacio - Sistema de Reservas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-info-circle"></i> Esta acción desactivará el espacio. No se eliminarán los datos.
+                    </div>
+                    
+                    <p>¿Estás seguro de que deseas desactivar el siguiente espacio?</p>
+                    
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h5>{{ espacio.nombre }}</h5>
+                            <p class="mb-0">
+                                <strong>Código:</strong> {{ espacio.codigo }}<br>
+                                <strong>Tipo:</strong> {{ espacio.tipo.nombre }}<br>
+                                <strong>Ubicación:</strong> {{ espacio.ubicacion }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'detalle_espacio' espacio.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Desactivar Espacio
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

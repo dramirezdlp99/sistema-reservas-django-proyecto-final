@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ accion }} Reserva - Sistema de Reservas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-calendar-plus"></i> {{ accion }} Reserva
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="reservaForm">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.espacio.id_for_label }}" class="form-label">
+                                <i class="bi bi-building"></i> {{ form.espacio.label }} *
+                            </label>
+                            {{ form.espacio }}
+                            {% if form.espacio.errors %}
+                                <div class="text-danger">{{ form.espacio.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.fecha_reserva.id_for_label }}" class="form-label">
+                                    <i class="bi bi-calendar"></i> {{ form.fecha_reserva.label }} *
+                                </label>
+                                {{ form.fecha_reserva }}
+                                {% if form.fecha_reserva.errors %}
+                                    <div class="text-danger">{{ form.fecha_reserva.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.hora_inicio.id_for_label }}" class="form-label">
+                                    <i class="bi bi-clock"></i> {{ form.hora_inicio.label }} *
+                                </label>
+                                {{ form.hora_inicio }}
+                                {% if form.hora_inicio.errors %}
+                                    <div class="text-danger">{{ form.hora_inicio.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.hora_fin.id_for_label }}" class="form-label">
+                                    <i class="bi bi-clock-fill"></i> {{ form.hora_fin.label }} *
+                                </label>
+                                {{ form.hora_fin }}
+                                {% if form.hora_fin.errors %}
+                                    <div class="text-danger">{{ form.hora_fin.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.motivo.id_for_label }}" class="form-label">
+                                <i class="bi bi-card-text"></i> {{ form.motivo.label }} *
+                            </label>
+                            {{ form.motivo }}
+                            {% if form.motivo.errors %}
+                                <div class="text-danger">{{ form.motivo.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                                <i class="bi bi-file-text"></i> {{ form.descripcion.label }}
+                            </label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                                <div class="text-danger">{{ form.descripcion.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> <strong>Nota:</strong> Tu reserva será confirmada automáticamente si el sistema lo permite. De lo contrario, quedará pendiente de aprobación por un administrador.
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'lista_reservas' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> {{ accion }} Reserva
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Establecer fecha mínima como hoy
+    const fechaInput = document.querySelector('input[type="date"]');
+    if (fechaInput) {
+        const hoy = new Date().toISOString().split('T')[0];
+        fechaInput.setAttribute('min', hoy);
+    }
+});
+</script>
+{% endblock %}

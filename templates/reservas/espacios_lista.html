@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Espacios Disponibles - Sistema de Reservas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-building"></i> Espacios Disponibles</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_authenticated and user.perfil.rol == 'ADMINISTRADOR' %}
+            <a href="{% url 'crear_espacio' %}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Crear Espacio
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" name="q" class="form-control" placeholder="Nombre, código o ubicación" value="{{ busqueda|default:'' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Tipo de Espacio</label>
+                    <select name="tipo" class="form-select">
+                        <option value="">Todos los tipos</option>
+                        {% for tipo in tipos_espacios %}
+                        <option value="{{ tipo.id }}" {% if tipo_seleccionado == tipo.id|stringformat:"s" %}selected{% endif %}>
+                            {{ tipo.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    <a href="{% url 'lista_espacios' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Espacios -->
+    <div class="row">
+        {% for espacio in espacios %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if espacio.imagen %}
+                <img src="{{ espacio.imagen.url }}" class="card-img-top" alt="{{ espacio.nombre }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="bi bi-building display-1"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ espacio.nombre }}</h5>
+                    <p class="text-muted mb-2">
+                        <span class="badge bg-info">{{ espacio.tipo.nombre }}</span>
+                    </p>
+                    <p class="card-text">
+                        <i class="bi bi-hash"></i> <strong>Código:</strong> {{ espacio.codigo }}<br>
+                        <i class="bi bi-geo-alt"></i> <strong>Ubicación:</strong> {{ espacio.ubicacion }}<br>
+                        <i class="bi bi-people"></i> <strong>Capacidad:</strong> {{ espacio.capacidad }} personas
+                    </p>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'detalle_espacio' espacio.pk %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-eye"></i> Ver Detalles
+                        </a>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'crear_reserva' %}?espacio={{ espacio.pk }}" class="btn btn-success btn-sm">
+                            <i class="bi bi-calendar-plus"></i> Reservar
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i> No se encontraron espacios con los criterios seleccionados.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
