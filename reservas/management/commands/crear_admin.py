@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from reservas.models import PerfilUsuario
+import os
 
 class Command(BaseCommand):
     help = 'Crea un superusuario admin si no existe'
@@ -8,20 +9,21 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         username = 'admin'
         email = 'davidramirezdelaparra99@gmail.com'
-        password = 'dramirez.1999'
+        # Obtener contraseña desde variable de entorno
+        password = os.environ.get('ADMIN_PASSWORD', 'cambiar-esta-contraseña')
         
         # Verificar si el usuario ya existe
         if User.objects.filter(username=username).exists():
             self.stdout.write(self.style.WARNING(f'El usuario {username} ya existe'))
             admin_user = User.objects.get(username=username)
             
-            # Actualizar contraseña por si acaso
+            # Actualizar contraseña por si cambió en variables de entorno
             admin_user.set_password(password)
             admin_user.email = email
             admin_user.is_staff = True
             admin_user.is_superuser = True
             admin_user.save()
-            self.stdout.write(self.style.SUCCESS(f'Contraseña actualizada para {username}'))
+            self.stdout.write(self.style.SUCCESS(f'Usuario {username} actualizado'))
         else:
             # Crear el superusuario
             admin_user = User.objects.create_superuser(
