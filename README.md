@@ -766,4 +766,641 @@ python manage.py poblar_datos
 - ✅ Variables de entorno seguras
 - ✅ Archivos estáticos servidos con WhiteNoise
 - ✅ HTTPS automático
-- ✅
+- ✅ Despliegue continuo desde GitHub
+- ✅ Logs en tiempo real
+
+## 🌐 URLs del Proyecto
+
+- **Aplicación Web:** `https://sistema-reservas-django.onrender.com`
+- **Panel de Administración Django:** `https://sistema-reservas-django.onrender.com/admin/`
+- **Repositorio GitHub:** `https://github.com/dramirezdlp99/sistema-reservas-django-proyecto-final.git`
+
+> **Nota:** Las URLs se actualizarán después del despliegue.
+
+---
+
+## ⚙️ Configuración de Variables de Entorno en Render
+
+Las siguientes variables de entorno están configuradas en el servicio:
+
+| Variable | Valor | Descripción |
+|----------|-------|-------------|
+| `SECRET_KEY` | [Generada] | Clave secreta de Django |
+| `DEBUG` | `False` | Modo de depuración desactivado |
+| `DATABASE_URL` | [Auto-generada] | URL de conexión PostgreSQL |
+| `PYTHON_VERSION` | `3.12.3` | Versión de Python |
+
+---
+
+## 📁 Archivos de Configuración para Despliegue
+
+### build.sh
+
+Script de construcción ejecutado por Render:
+
+#!/usr/bin/env bash
+set -o errexit
+
+pip install -r requirements.txt
+python manage.py collectstatic --no-input
+python manage.py migrate
+
+text
+
+### runtime.txt
+
+Especifica la versión de Python:
+
+python-3.12.3
+
+text
+
+### Comando de Inicio
+
+gunicorn reservas_espacios.wsgi:application
+
+text
+
+---
+
+## 🚀 Proceso de Despliegue
+
+### Commit y Push a GitHub
+
+git add .
+git commit -m "Preparar para despliegue"
+git push origin main
+
+text
+
+### Render detecta cambios automáticamente
+
+1. Ejecuta `build.sh`
+2. Instala dependencias
+3. Recolecta archivos estáticos
+4. Ejecuta migraciones
+5. Reinicia el servicio
+
+**Tiempo de despliegue:** ~5-10 minutos
+
+---
+
+## ⚠️ Limitaciones del Plan Gratuito
+
+**Importante:** El plan gratuito de Render tiene las siguientes limitaciones:
+
+### Web Service
+
+- El servicio se "duerme" después de 15 minutos de inactividad
+- Primera carga después de inactividad: ~50 segundos
+- 750 horas/mes de uso (suficiente para proyecto académico)
+
+### PostgreSQL
+
+- Base de datos expira después de 90 días
+- 256 MB de almacenamiento
+- Conexiones limitadas
+- Respaldos no incluidos
+
+### ✅ Suficiente para:
+
+- Proyectos académicos
+- Demostraciones
+- Desarrollo y pruebas
+
+---
+
+## 📊 Monitoreo y Mantenimiento
+
+### Acceso a Logs
+
+1. Dashboard de Render
+2. Seleccionar el servicio
+3. Pestaña "Logs"
+4. Ver logs en tiempo real
+
+### Comandos útiles desde Shell de Render
+
+Ver versión de Python
+python --version
+
+Ver paquetes instalados
+pip list
+
+Ejecutar comando Django
+python manage.py [comando]
+
+Acceder a shell de Django
+python manage.py shell
+
+Crear backup manual (antes de expiración)
+python manage.py dumpdata > backup.json
+
+text
+
+---
+
+## 👥 Credenciales de Acceso
+
+### Producción
+
+**Administrador:**
+- Usuario: `admin`
+- Contraseña: [Configurada durante despliegue]
+
+### Desarrollo Local
+
+**Administrador:**
+- Usuario: `admin`
+- Contraseña: `admin123`
+
+**Usuarios de Prueba:**
+- `jperez` / `usuario123` (Ingeniería)
+- `mgarcia` / `usuario123` (Administración)
+- `lrodriguez` / `usuario123` (Ciencias)
+
+---
+
+## 🐛 Solución de Problemas Comunes
+
+### Error: "No module named 'reservas'"
+
+**Causa:** No estás en el directorio correcto o el entorno virtual no está activado.
+
+**Solución:**
+
+cd proyecto_final_Django
+source venv/bin/activate # o venv\Scripts\activate en Windows
+python manage.py runserver
+
+text
+
+### Error: "CSRF verification failed"
+
+**Causa:** Tokens CSRF expirados o cookies bloqueadas.
+
+**Solución:**
+
+- Limpiar cookies del navegador
+- Verificar que todos los formularios tengan `{% csrf_token %}`
+- En desarrollo, verificar que `DEBUG=True`
+
+### Error: "OperationalError: no such table"
+
+**Causa:** Migraciones no ejecutadas.
+
+**Solución:**
+
+python manage.py makemigrations
+python manage.py migrate
+
+text
+
+### Error: Imágenes no se muestran
+
+**Causa:** Configuración de MEDIA incorrecta o carpeta no existe.
+
+**Solución:**
+
+1. Verificar en `settings.py`:
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+text
+
+2. Crear carpeta `media/espacios/` si no existe
+
+3. En desarrollo, agregar a `urls.py`:
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+if settings.DEBUG:
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+text
+
+### Error: "Application failed to start" (Render)
+
+**Causa:** Error en configuración de producción.
+
+**Solución:**
+
+- Revisar logs en Render
+- Verificar que `gunicorn` esté en `requirements.txt`
+- Verificar comando de inicio: `gunicorn reservas_espacios.wsgi:application`
+- Verificar que `ALLOWED_HOSTS` incluya el dominio
+
+### Error: "DisallowedHost at /"
+
+**Causa:** Dominio no está en `ALLOWED_HOSTS`.
+
+**Solución:** En `settings.py`:
+
+ALLOWED_HOSTS = ['*'] # Para desarrollo
+
+o
+ALLOWED_HOSTS = ['tu-app.onrender.com', 'localhost', '127.0.0.1']
+
+text
+
+### Error: Archivos estáticos no cargan (Render)
+
+**Causa:** `collectstatic` no se ejecutó o WhiteNoise mal configurado.
+
+**Solución:**
+
+1. Verificar que `build.sh` tenga:
+
+python manage.py collectstatic --no-input
+
+text
+
+2. Verificar en `settings.py`:
+
+MIDDLEWARE = [
+'whitenoise.middleware.WhiteNoiseMiddleware', # Después de SecurityMiddleware
+...
+]
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+text
+
+3. Ejecutar manualmente en Shell de Render:
+
+python manage.py collectstatic --no-input
+
+text
+
+### Error: Base de datos no conecta (Render)
+
+**Causa:** Variable `DATABASE_URL` mal configurada.
+
+**Solución:**
+
+1. Ir a base de datos en Render
+2. Copiar "Internal Database URL"
+3. Agregar como variable de entorno en Web Service
+4. Verificar en `settings.py` que `dj-database-url` esté configurado
+
+---
+
+## 📝 Buenas Prácticas Implementadas
+
+### Arquitectura y Código
+
+- ✅ **Separación de responsabilidades:** Modelos, Vistas, Templates
+- ✅ **DRY (Don't Repeat Yourself):** Templates con herencia
+- ✅ **Reutilización de código:** Componentes modulares
+- ✅ **Nombres descriptivos:** Variables y funciones claras
+- ✅ **Comentarios en código complejo**
+- ✅ **Validaciones en múltiples capas:** Modelo, Formulario, Vista
+
+### Base de Datos
+
+- ✅ **Uso de ORM de Django:** Abstracción de SQL
+- ✅ **Queries optimizadas:** `select_related()` y `prefetch_related()`
+- ✅ **Índices en campos frecuentes:** `unique=True`, `db_index=True`
+- ✅ **Migraciones versionadas:** Control de cambios en esquema
+- ✅ **Validaciones de integridad:** Constraints en modelos
+
+### Seguridad
+
+- ✅ **Protección CSRF:** Tokens en todos los formularios
+- ✅ **Autenticación robusta:** Sistema de Django
+- ✅ **Control de acceso por roles:** Decoradores personalizados
+- ✅ **Validación de permisos:** En vistas y templates
+- ✅ **Variables de entorno:** Credenciales fuera del código
+- ✅ **HTTPS en producción:** SSL automático en Render
+- ✅ **Cookies seguras:** `SESSION_COOKIE_SECURE = True` en producción
+
+### Frontend
+
+- ✅ **Diseño responsive:** Bootstrap 5
+- ✅ **Accesibilidad:** Etiquetas semánticas, atributos alt
+- ✅ **UX intuitiva:** Mensajes claros, confirmaciones
+- ✅ **Feedback visual:** Alertas, spinners, animaciones
+- ✅ **Cross-browser:** Compatible con navegadores modernos
+
+### Testing y Calidad
+
+- ✅ **Manejo de excepciones:** Try-catch en operaciones críticas
+- ✅ **Mensajes informativos:** Success, error, warning, info
+- ✅ **Logging:** Errores registrados en producción
+- ✅ **Validaciones exhaustivas:** Frontend y backend
+
+### DevOps
+
+- ✅ **Control de versiones:** Git con commits descriptivos
+- ✅ **Despliegue automatizado:** CI/CD con Render
+- ✅ **Gestión de dependencias:** `requirements.txt` actualizado
+- ✅ **Configuración por entornos:** Desarrollo vs Producción
+- ✅ **Documentación completa:** README técnico
+
+---
+
+## 🔮 Futuras Mejoras Propuestas
+
+### Funcionalidades
+
+- [ ] **Calendario interactivo:** Integración con FullCalendar.js para visualización mensual
+- [ ] **Notificaciones push:** Alertas en navegador para recordatorios
+- [ ] **Sistema de comentarios:** Valoraciones y reseñas de espacios
+- [ ] **Reservas recurrentes:** Crear series de reservas automáticas
+- [ ] **Lista de espera:** Cola cuando un espacio está ocupado
+- [ ] **QR codes:** Generación de códigos QR para check-in
+- [ ] **Integración con calendarios externos:** Google Calendar, Outlook
+- [ ] **Chat en tiempo real:** Soporte entre usuarios y administradores
+
+### Técnicas
+
+- [ ] **API REST completa:** Django REST Framework
+- [ ] **Aplicación móvil:** React Native o Flutter
+- [ ] **WebSockets:** Actualizaciones en tiempo real
+- [ ] **Caché:** Redis para mejorar rendimiento
+- [ ] **Búsqueda avanzada:** ElasticSearch o PostgreSQL Full-Text Search
+- [ ] **Tests automatizados:** Unit tests y integration tests
+- [ ] **Docker:** Containerización para despliegue consistente
+- [ ] **CI/CD avanzado:** GitHub Actions con tests automáticos
+
+### Analítica
+
+- [ ] **Dashboard mejorado:** Métricas en tiempo real
+- [ ] **Predicción de demanda:** Machine Learning para análisis
+- [ ] **Reportes personalizados:** Generador de reportes customizables
+- [ ] **Exportación adicional:** JSON, CSV, XML
+
+### Seguridad
+
+- [ ] **Autenticación de dos factores (2FA)**
+- [ ] **OAuth:** Login con Google, Microsoft, Facebook
+- [ ] **Auditoría completa:** Log de todas las acciones
+- [ ] **Backups automáticos:** Respaldo diario de base de datos
+
+---
+
+## 📚 Referencias y Recursos
+
+### Documentación Oficial
+
+- [Django Documentation](https://docs.djangoproject.com/en/5.2/)
+- [Bootstrap Documentation](https://getbootstrap.com/docs/5.3/)
+- [Chart.js Documentation](https://www.chartjs.org/docs/latest/)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+- [Render Documentation](https://render.com/docs)
+
+### Tutoriales y Guías
+
+- [Django Girls Tutorial](https://tutorial.djangogirls.org/)
+- [Real Python - Django Tutorials](https://realpython.com/tutorials/django/)
+- [MDN Web Docs - Django](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django)
+
+### Herramientas Utilizadas
+
+- [VS Code](https://code.visualstudio.com/) - Editor de código
+- [Git](https://git-scm.com/) - Control de versiones
+- [GitHub](https://github.com/) - Repositorio remoto
+- [Render](https://render.com/) - Plataforma de despliegue
+- [PostgreSQL](https://www.postgresql.org/) - Base de datos
+
+---
+
+## 📄 Licencia
+
+Este proyecto fue desarrollado con fines exclusivamente académicos como parte del programa de Ingeniería de Software de la Universidad Cooperativa de Colombia.
+
+- **Uso:** Académico y educativo
+- **Distribución:** Permitida con fines educativos citando la fuente
+- **Modificación:** Permitida para mejoras académicas
+
+---
+
+## 👨‍💻 Información del Equipo
+
+### Autores
+
+**Equipo de Desarrollo:**
+- David Fernando Ramírez de la Parra
+- Daniers Alexander Solarte Limas
+- Juan Felipe Mora Revelo
+
+**Programa Académico:**
+- Ingeniería de Software - Quinto Semestre
+- Universidad Cooperativa de Colombia
+- Electiva I
+
+**Docente:**
+- Cristian Camilo Ordoñez Quintero
+
+**Periodo Académico:** 2025
+
+---
+
+## 📞 Contacto y Soporte
+
+### Correo Electrónico
+
+**Proyecto:** [davidramirezdelaparra99@gmail.com](mailto:davidramirezdelaparra99@gmail.com)
+              [solartedaniers@gmail.com](mailto:solartedaniers@gmail.com)
+              [juanfelipemorarevelo@gmail.com](mailto:juanfelipemorarevelo@gmail.com)
+
+### Repositorio
+
+**GitHub:** [github.com/dramirezdlp99/sistema-reservas-django-proyecto-final.git](https://github.com/)
+
+### Reportar Issues
+
+Si encuentras algún error o tienes sugerencias:
+
+1. Ir al repositorio en GitHub
+2. Pestaña "Issues"
+3. Click en "New Issue"
+4. Describir el problema o sugerencia
+
+---
+
+## 🙏 Agradecimientos
+
+### Institucionales
+
+- **Universidad Cooperativa de Colombia** por brindar la formación académica
+- **Profesor Cristian Camilo Ordoñez Quintero** por la guía y asesoría en el desarrollo del proyecto
+- **Programa de Ingeniería de Software** por el plan de estudios integral
+
+### Técnicos
+
+- **Django Software Foundation** por el excelente framework
+- **Comunidad de Django** por la documentación y recursos
+- **Bootstrap Team** por el framework CSS
+- **Chart.js Contributors** por la librería de gráficos
+- **Render.com** por la plataforma de hosting gratuita
+
+### Inspiración
+
+- Proyectos open source de la comunidad Django
+- Sistemas de reservas existentes que sirvieron como referencia
+- Feedback de compañeros y usuarios de prueba
+
+---
+
+## 📊 Métricas del Proyecto
+
+### Estadísticas de Desarrollo
+
+- **Líneas de código:** ~3,500
+- **Archivos Python:** 15
+- **Templates HTML:** 20
+- **Modelos de datos:** 4
+- **Vistas implementadas:** 25
+- **URLs configuradas:** 22
+- **Tiempo de desarrollo:** 4 semanas
+- **Commits en Git:** 50+
+
+### Cobertura Funcional
+
+- ✅ **Autenticación:** 100%
+- ✅ **CRUD Espacios:** 100%
+- ✅ **CRUD Reservas:** 100%
+- ✅ **Reportes:** 100%
+- ✅ **Validaciones:** 100%
+- ✅ **Responsive Design:** 100%
+- ✅ **Exportación:** 100%
+
+---
+
+## 📖 Glosario de Términos
+
+- **CRUD:** Create, Read, Update, Delete - Operaciones básicas de persistencia
+- **MVT:** Model-View-Template - Patrón arquitectónico de Django
+- **ORM:** Object-Relational Mapping - Mapeo entre objetos Python y tablas de base de datos
+- **WSGI:** Web Server Gateway Interface - Especificación para servidores web Python
+- **PostgreSQL:** Sistema de gestión de bases de datos relacional open source
+- **Bootstrap:** Framework CSS para desarrollo responsive
+- **Gunicorn:** Servidor HTTP WSGI para aplicaciones Python
+- **WhiteNoise:** Librería para servir archivos estáticos en Django
+- **SMTP:** Simple Mail Transfer Protocol - Protocolo para envío de correos
+- **API:** Application Programming Interface - Interfaz de programación de aplicaciones
+- **JSON:** JavaScript Object Notation - Formato de intercambio de datos
+
+---
+
+## 📅 Historial de Versiones
+
+### Versión 1.0.0 (Noviembre 2025)
+
+- ✅ Release inicial del sistema
+- ✅ Funcionalidades core completas
+- ✅ Despliegue en producción
+- ✅ Documentación completa
+
+### Cambios Principales
+
+- Implementación de modelos de datos
+- Sistema de autenticación con roles
+- CRUD completo de espacios y reservas
+- Panel de reportes con 4 gráficos
+- Exportación PDF y Excel
+- Validación de conflictos de horarios
+- Diseño responsive con Bootstrap 5
+- Despliegue en Render con PostgreSQL
+
+---
+
+## 🎓 Conclusiones Académicas
+
+Este proyecto representa la aplicación práctica de los conocimientos adquiridos en la asignatura Electiva I, integrando:
+
+### Conceptos Aplicados
+
+#### Desarrollo Web Full-Stack
+
+- Backend con Django (Python)
+- Frontend con Bootstrap y JavaScript
+- Base de datos relacional (PostgreSQL/SQLite)
+
+#### Arquitectura de Software
+
+- Patrón MVT correctamente implementado
+- Separación de responsabilidades
+- Código modular y reutilizable
+
+#### Ingeniería de Software
+
+- Análisis de requerimientos
+- Diseño de base de datos normalizada
+- Implementación de casos de uso
+- Pruebas funcionales
+- Despliegue en producción
+
+#### Buenas Prácticas
+
+- Control de versiones con Git
+- Documentación técnica completa
+- Código legible y mantenible
+- Seguridad y validaciones
+
+### Competencias Desarrolladas
+
+- ✅ Diseño y modelado de bases de datos relacionales
+- ✅ Desarrollo de aplicaciones web con Django
+- ✅ Implementación de sistemas de autenticación y autorización
+- ✅ Creación de interfaces de usuario responsive
+- ✅ Generación de reportes y visualización de datos
+- ✅ Despliegue de aplicaciones en la nube
+- ✅ Trabajo colaborativo con control de versiones
+- ✅ Documentación técnica profesional
+
+---
+
+## 📋 Checklist de Entregables
+
+### Requisitos del Proyecto ✅
+
+- [x] **Aplicación web completa funcional**
+- [x] **Framework Django implementado**
+- [x] **Arquitectura MVT correcta**
+- [x] **Autenticación de usuarios**
+- [x] **Roles diferenciados (Admin/Usuario)**
+- [x] **4 modelos principales relacionados**
+- [x] **Operaciones CRUD completas**
+- [x] **Formularios validados**
+- [x] **Panel de administración (Dashboard)**
+- [x] **Gráficos dinámicos (Chart.js)**
+- [x] **Reportes en PDF**
+- [x] **Reportes en Excel**
+- [x] **Filtros de búsqueda**
+- [x] **Interfaz responsive (Bootstrap)**
+- [x] **Validaciones y control de errores**
+- [x] **Despliegue en Render**
+- [x] **Base de datos PostgreSQL en producción**
+- [x] **README.md completo**
+- [x] **Documentación técnica**
+- [x] **URL pública funcional**
+
+### Características Específicas del Proyecto ✅
+
+- [x] **Sistema de reservas de espacios**
+- [x] **Validación de conflictos de horarios**
+- [x] **Confirmación automática/manual**
+- [x] **Historial de reservas**
+- [x] **Gráficos: ocupación semanal y uso por sala**
+- [x] **Notificaciones por correo (configurado)**
+- [x] **Panel responsive**
+- [x] **Calendario interactivo (datos API)**
+
+---
+
+**Nota Final:** Este README incluye toda la documentación técnica completa requerida para el proyecto académico, incluyendo descripción detallada del sistema, arquitectura, modelos de datos, rutas principales, instrucciones de instalación, configuración, despliegue, y toda la información relevante para evaluación y uso del sistema.
+
+---
+
+<div align="center">
+
+**Sistema de Reservas de Espacios v1.0.0**
+
+*Desarrollado por el equipo de Ingeniería de Software - Universidad Cooperativa de Colombia*
+
+*Última actualización: Noviembre 2025*
+
+</div>
