@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'reservas', 
     'crispy_forms',
     'crispy_bootstrap4',
+    'import_export',
 ]
 
 MIDDLEWARE = [
