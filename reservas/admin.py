@@ -47,6 +47,6 @@ class ReservaAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(PerfilUsuario)
 class PerfilUsuarioAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ['usuario', 'rol', 'telefono', 'departamento', 'notificaciones_email']
+    list_display = ['user', 'rol', 'telefono', 'departamento', 'notificaciones_email']  # <-- Cambiado 'usuario' por 'user'
     list_filter = ['rol', 'departamento']
-    search_fields = ['usuario__username', 'telefono', 'departamento']
+    search_fields = ['user__username', 'telefono', 'departamento']  # <-- Cambiado 'usuario__username' por 'user__username'
